@@ -22,7 +22,7 @@ object ImageOptimizer {
         config: ImageConfig
     ): Result<File> = withContext(Dispatchers.IO) {
         try {
-            // 1. Decode bounds and EXIF orientation
+            // 1. Decode bounds only
             val boundsOptions = BitmapFactory.Options().apply { inJustDecodeBounds = true }
             context.contentResolver.openInputStream(inputUri)?.use {
                 BitmapFactory.decodeStream(it, null, boundsOptions)
@@ -31,11 +31,24 @@ object ImageOptimizer {
             val originalWidth = boundsOptions.outWidth
             val originalHeight = boundsOptions.outHeight
 
-            val targetTargetMax = if (config.platform == PhotoPlatform.ORIGINAL_MAX_2048) 2048 else max(config.width, config.height)
+            if (originalWidth <= 0 || originalHeight <= 0) {
+                return@withContext Result.failure(Exception("Gagal membaca dimensi gambar"))
+            }
+
+            // 2. Calculate inSampleSize to prevent OOM on huge photos (50MP+)
+            val targetMax = if (config.platform == PhotoPlatform.ORIGINAL_MAX_2048) {
+                2048
+            } else {
+                max(config.width, config.height)
+            }
 
             var inSampleSize = 1
-            while (originalWidth / (inSampleSize * 2) >= targetTargetMax && originalHeight / (inSampleSize * 2) >= targetTargetMax) {
+            var testW = originalWidth / 2
+            var testH = originalHeight / 2
+            while (testW >= targetMax && testH >= targetMax) {
                 inSampleSize *= 2
+                testW = originalWidth / (inSampleSize * 2)
+                testH = originalHeight / (inSampleSize * 2)
             }
 
             val decodeOptions = BitmapFactory.Options().apply {
@@ -47,17 +60,21 @@ object ImageOptimizer {
                 BitmapFactory.decodeStream(it, null, decodeOptions)
             } ?: return@withContext Result.failure(Exception("Gagal membuka file gambar"))
 
-            // Handle EXIF orientation rotation
+            // 3. Handle EXIF orientation
             context.contentResolver.openInputStream(inputUri)?.use { stream ->
                 val exif = ExifInterface(stream)
-                val orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
+                val orientation = exif.getAttributeInt(
+                    ExifInterface.TAG_ORIENTATION,
+                    ExifInterface.ORIENTATION_NORMAL
+                )
                 loadedBitmap = rotateBitmap(loadedBitmap, orientation)
             }
 
+            // 4. Scale and crop to target resolution
             val processedBitmap: Bitmap
 
             if (config.platform == PhotoPlatform.ORIGINAL_MAX_2048) {
-                // Keep original aspect ratio, scale longest edge to 2048px (WhatsApp HD sweet spot)
+                // Preserve ratio, scale longest edge to 2048px
                 val maxDim = max(loadedBitmap.width, loadedBitmap.height)
                 if (maxDim > 2048) {
                     val scale = 2048f / maxDim
@@ -69,10 +86,12 @@ object ImageOptimizer {
                     processedBitmap = loadedBitmap
                 }
             } else {
-                // Fixed target resolution (e.g. 1080x1920, 1080x1350, 1080x1080)
                 val targetW = config.width
                 val targetH = config.height
-                val scale = max(targetW.toFloat() / loadedBitmap.width, targetH.toFloat() / loadedBitmap.height)
+                val scale = max(
+                    targetW.toFloat() / loadedBitmap.width,
+                    targetH.toFloat() / loadedBitmap.height
+                )
 
                 val scaledW = (loadedBitmap.width * scale).roundToInt()
                 val scaledH = (loadedBitmap.height * scale).roundToInt()
@@ -87,7 +106,7 @@ object ImageOptimizer {
                 if (processedBitmap != scaled) scaled.recycle()
             }
 
-            // 3. Smart Edge Sharpening (Crucial for Instagram/WhatsApp photo preservation)
+            // 5. Sharpen AFTER crop — bitmap now <=1080x1920 = ~8MB, safe
             var finalBitmap = processedBitmap
             if (config.applySharpen) {
                 val sharpened = applySubtleSharpen(finalBitmap)
@@ -97,13 +116,16 @@ object ImageOptimizer {
                 }
             }
 
-            // 4. Save to baseline JPEG with clean 4:2:0 / 4:4:4 quantization matrix
+            // 6. Save baseline JPEG sRGB
             FileOutputStream(outputFile).use { out ->
                 finalBitmap.compress(Bitmap.CompressFormat.JPEG, config.quality, out)
             }
             finalBitmap.recycle()
 
             Result.success(outputFile)
+        } catch (e: OutOfMemoryError) {
+            System.gc()
+            Result.failure(Exception("Gambar terlalu besar. Coba resolusi lebih kecil."))
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -127,20 +149,24 @@ object ImageOptimizer {
     }
 
     /**
-     * Laplacian 3x3 unsharp convolution kernel with 0.28 weight.
-     * Prevents social media downsampling and JPEG re-quantization from washing away edges.
+     * Laplacian 3x3 unsharp convolution, weight 0.28.
+     * Applied AFTER crop to target — max ~1080x1920 pixel buffer, safe for all devices.
      */
     private fun applySubtleSharpen(src: Bitmap): Bitmap {
         val width = src.width
         val height = src.height
-        val output = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
 
+        // Guard: skip sharpen if bitmap somehow exceeds 16MP (safety valve)
+        if (width.toLong() * height > 16_000_000L) return src
+
+        val output = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val pixels = IntArray(width * height)
         src.getPixels(pixels, 0, width, 0, 0, width, height)
         val outPixels = IntArray(width * height)
 
         val weight = 0.28f
 
+        // Copy border pixels unchanged
         System.arraycopy(pixels, 0, outPixels, 0, width)
         System.arraycopy(pixels, (height - 1) * width, outPixels, (height - 1) * width, width)
 

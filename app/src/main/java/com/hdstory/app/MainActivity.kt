@@ -33,18 +33,25 @@ class MainActivity : AppCompatActivity() {
     private var isVideoFile: Boolean = false
     private var processedFile: File? = null
 
-    // Photo only picker
+    // Photo picker
     private val pickPhotoLauncher = registerForActivityResult(
         ActivityResultContracts.PickVisualMedia()
     ) { uri: Uri? ->
         uri?.let { onMediaSelected(it, false) }
     }
 
-    // Video only picker
+    // Video picker
     private val pickVideoLauncher = registerForActivityResult(
         ActivityResultContracts.PickVisualMedia()
     ) { uri: Uri? ->
         uri?.let { onMediaSelected(it, true) }
+    }
+
+    // Fallback for devices without Photo Picker (SDK < 30)
+    private val pickFallbackLauncher = registerForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let { onMediaSelected(it, currentTab == MediaTypeTab.VIDEO) }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,6 +61,31 @@ class MainActivity : AppCompatActivity() {
 
         setupUI()
         setupListeners()
+        handleIncomingShare(intent)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handleIncomingShare(intent)
+    }
+
+    /**
+     * Handle ACTION_SEND from gallery / other apps — auto-detect photo vs video
+     */
+    private fun handleIncomingShare(intent: Intent?) {
+        if (intent?.action != Intent.ACTION_SEND) return
+        val uri = intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM) ?: return
+        val mimeType = contentResolver.getType(uri) ?: return
+
+        if (mimeType.startsWith("video/")) {
+            binding.toggleMediaType.check(R.id.btnTabVideo)
+            updateTabUI(MediaTypeTab.VIDEO)
+            onMediaSelected(uri, true)
+        } else if (mimeType.startsWith("image/")) {
+            binding.toggleMediaType.check(R.id.btnTabPhoto)
+            updateTabUI(MediaTypeTab.PHOTO)
+            onMediaSelected(uri, false)
+        }
     }
 
     private fun setupUI() {
@@ -68,6 +100,8 @@ class MainActivity : AppCompatActivity() {
         binding.ivPreview.visibility = View.GONE
         binding.layoutExportActions.visibility = View.GONE
         binding.btnOptimize.isEnabled = false
+        binding.progressBar.visibility = View.GONE
+        binding.progressBar.progress = 0
         binding.tvStatus.text = getString(R.string.status_ready)
         binding.tvMediaInfo.text = getString(R.string.no_media_selected)
 
@@ -98,15 +132,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.btnSelectMedia.setOnClickListener {
-            if (currentTab == MediaTypeTab.PHOTO) {
-                pickPhotoLauncher.launch(
-                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                )
-            } else {
-                pickVideoLauncher.launch(
-                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.VideoOnly)
-                )
-            }
+            launchMediaPicker()
         }
 
         binding.btnOptimize.setOnClickListener {
@@ -136,16 +162,36 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun launchMediaPicker() {
+        val isPhotoPicker = ActivityResultContracts.PickVisualMedia.isPhotoPickerAvailable(this)
+
+        if (isPhotoPicker) {
+            if (currentTab == MediaTypeTab.PHOTO) {
+                pickPhotoLauncher.launch(
+                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                )
+            } else {
+                pickVideoLauncher.launch(
+                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.VideoOnly)
+                )
+            }
+        } else {
+            // Fallback for older devices without Photo Picker API
+            val mimeType = if (currentTab == MediaTypeTab.PHOTO) "image/*" else "video/*"
+            pickFallbackLauncher.launch(mimeType)
+        }
+    }
+
     private fun onMediaSelected(uri: Uri, isVideo: Boolean) {
         selectedUri = uri
         isVideoFile = isVideo
 
         if (isVideo) {
             val duration = FileUtils.getVideoDurationSeconds(this, uri)
-            binding.tvMediaInfo.text = "Video dipilih: %.1f dtk (Target 9:16 1080p)".format(duration)
+            binding.tvMediaInfo.text = "Video dipilih (%.1f dtk) - Siap optimasi HD".format(duration)
             binding.ivPreview.visibility = View.GONE
         } else {
-            binding.tvMediaInfo.text = "Foto dipilih: Siap dioptimasi HD & Anti-Pecah"
+            binding.tvMediaInfo.text = "Foto dipilih - Siap dioptimasi HD & Anti-Pecah"
             binding.ivPreview.setImageURI(uri)
             binding.ivPreview.visibility = View.VISIBLE
         }
@@ -153,6 +199,8 @@ class MainActivity : AppCompatActivity() {
         binding.btnSelectMedia.text = getString(R.string.change_media)
         binding.btnOptimize.isEnabled = true
         binding.layoutExportActions.visibility = View.GONE
+        binding.progressBar.visibility = View.GONE
+        binding.progressBar.progress = 0
         binding.tvStatus.text = getString(R.string.status_ready)
     }
 
@@ -176,10 +224,14 @@ class MainActivity : AppCompatActivity() {
     private fun startOptimization(uri: Uri) {
         val applySharpen = binding.switchSharpen.isChecked
 
+        // Clean old cache files (>1 hour old)
+        cleanOldCache()
+
         binding.btnOptimize.isEnabled = false
         binding.btnSelectMedia.isEnabled = false
         binding.progressBar.visibility = View.VISIBLE
-        binding.progressBar.isIndeterminate = true
+        binding.progressBar.progress = 0
+        binding.progressBar.isIndeterminate = (currentTab == MediaTypeTab.PHOTO)
         binding.tvStatus.text = getString(R.string.status_processing)
         binding.layoutExportActions.visibility = View.GONE
 
@@ -226,6 +278,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun handleResult(result: Result<File>) {
         binding.progressBar.visibility = View.GONE
+        binding.progressBar.progress = 0
         binding.btnOptimize.isEnabled = true
         binding.btnSelectMedia.isEnabled = true
 
@@ -233,10 +286,28 @@ class MainActivity : AppCompatActivity() {
             processedFile = file
             val sizeMb = file.length() / (1024f * 1024f)
             val info = if (currentTab == MediaTypeTab.VIDEO) "Video HD" else "Foto HD"
-            binding.tvStatus.text = "Selesai! $info (Ukuran: %.2f MB)".format(sizeMb)
+            binding.tvStatus.text = getString(R.string.status_done_size, info, sizeMb)
             binding.layoutExportActions.visibility = View.VISIBLE
+
+            // Show result preview for photos
+            if (currentTab == MediaTypeTab.PHOTO) {
+                binding.ivPreview.setImageURI(Uri.fromFile(file))
+                binding.ivPreview.visibility = View.VISIBLE
+            }
         }.onFailure { error ->
             binding.tvStatus.text = getString(R.string.status_error, error.localizedMessage ?: "Processing error")
         }
+    }
+
+    /**
+     * Clean old HDStory cache files (>1 hour) to prevent storage bloat
+     */
+    private fun cleanOldCache() {
+        try {
+            val threshold = System.currentTimeMillis() - 3_600_000
+            cacheDir.listFiles()?.filter {
+                it.name.startsWith("HDStory_") && it.lastModified() < threshold
+            }?.forEach { it.delete() }
+        } catch (_: Exception) {}
     }
 }

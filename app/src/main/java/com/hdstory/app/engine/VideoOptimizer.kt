@@ -2,6 +2,8 @@ package com.hdstory.app.engine
 
 import android.content.Context
 import android.net.Uri
+import android.os.Handler
+import android.os.Looper
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MimeTypes
 import androidx.media3.common.util.UnstableApi
@@ -27,7 +29,7 @@ object VideoOptimizer {
             outputFile.delete()
         }
 
-        // 1. Setup Video Effects (Force 1080x1920 9:16 Scale-to-fit with crop)
+        // 1. Scale-to-fit with crop to target resolution
         val presentationEffect = Presentation.createForWidthAndHeight(
             config.width,
             config.height,
@@ -38,7 +40,7 @@ object VideoOptimizer {
             .setEffects(Effects(listOf(), listOf(presentationEffect)))
             .build()
 
-        // 2. Setup Encoder Settings for Social Media High Profile
+        // 2. H.264 High Profile L4.1 encoder
         val videoEncoderSettings = VideoEncoderSettings.Builder()
             .setBitrate(config.targetBitrate)
             .setEncodingProfileLevel(
@@ -51,7 +53,7 @@ object VideoOptimizer {
             .setRequestedVideoEncoderSettings(videoEncoderSettings)
             .build()
 
-        // 3. Build Transformer
+        // 3. Build Transformer with listener
         val transformer = Transformer.Builder(context.applicationContext)
             .setVideoMimeType(MimeTypes.VIDEO_H264)
             .setAudioMimeType(MimeTypes.AUDIO_AAC)
@@ -59,6 +61,7 @@ object VideoOptimizer {
             .addListener(object : Transformer.Listener {
                 override fun onCompleted(composition: Composition, exportResult: ExportResult) {
                     if (continuation.isActive) {
+                        onProgress(100)
                         continuation.resume(Result.success(outputFile))
                     }
                 }
@@ -75,9 +78,24 @@ object VideoOptimizer {
             })
             .build()
 
-        // 4. Start Transform
+        // 4. Poll progress via getProgress() every 500ms on main thread
+        val handler = Handler(Looper.getMainLooper())
+        val progressHolder = ProgressHolder()
+        val progressPoller = object : Runnable {
+            override fun run() {
+                if (!continuation.isActive) return
+                val state = transformer.getProgress(progressHolder)
+                if (state == Transformer.PROGRESS_STATE_AVAILABLE) {
+                    onProgress(progressHolder.progress.coerceIn(0, 99))
+                }
+                handler.postDelayed(this, 500)
+            }
+        }
+
+        // 5. Start
         try {
             transformer.start(editedMediaItem, outputFile.absolutePath)
+            handler.postDelayed(progressPoller, 500)
         } catch (e: Exception) {
             if (continuation.isActive) {
                 continuation.resume(Result.failure(e))
@@ -85,6 +103,7 @@ object VideoOptimizer {
         }
 
         continuation.invokeOnCancellation {
+            handler.removeCallbacks(progressPoller)
             try {
                 transformer.cancel()
             } catch (_: Exception) {}
