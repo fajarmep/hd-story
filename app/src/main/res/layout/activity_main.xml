@@ -210,7 +210,7 @@
                         android:checked="true"
                         android:fontFamily="sans-serif-medium"
                         android:padding="8dp"
-                        android:text="Instagram (Story &amp; Reels 1080p, 30fps, 4.5M)"
+                        android:text="Instagram (Story &amp; Reels 1080p, 30fps, 8Mbps)"
                         android:textColor="@color/text_primary"
                         android:textSize="13sp" />
 
@@ -221,7 +221,7 @@
                         android:buttonTint="@color/primary_accent"
                         android:fontFamily="sans-serif-medium"
                         android:padding="8dp"
-                        android:text="WhatsApp Status HD (&lt;15MB Bypass Transcode)"
+                        android:text="WhatsApp Status HD (&lt;16MB Bypass Transcode)"
                         android:textColor="@color/text_primary"
                         android:textSize="13sp" />
 
@@ -232,7 +232,7 @@
                         android:buttonTint="@color/primary_accent"
                         android:fontFamily="sans-serif-medium"
                         android:padding="8dp"
-                        android:text="TikTok HD (1080x1920, 8.5M High Motion)"
+                        android:text="TikTok HD (1080x1920, 12Mbps High Detail)"
                         android:textColor="@color/text_primary"
                         android:textSize="13sp" />
                 </RadioGroup>

@@ -14,8 +14,8 @@ enum class PhotoPlatform(val label: String, val width: Int, val height: Int, val
 
 enum class VideoPlatform(val label: String) {
     INSTAGRAM_REELS_STORY("Instagram (Story & Reels 1080p, 30fps)"),
-    WHATSAPP_STATUS("WhatsApp Status HD (<15MB Bypass Transcode)"),
-    TIKTOK_HD("TikTok HD (1080x1920, 8.5M High Motion)")
+    WHATSAPP_STATUS("WhatsApp Status HD (<16MB Bypass Transcode)"),
+    TIKTOK_HD("TikTok HD (1080x1920, High Bitrate)")
 }
 
 data class VideoConfig(
@@ -24,8 +24,9 @@ data class VideoConfig(
     val frameRate: Int = 30,
     val targetBitrate: Int,
     val maxFileSizeBytes: Long = Long.MAX_VALUE,
-    val audioBitrate: Int = 128_000,
-    val audioSampleRate: Int = 44_100
+    val audioBitrate: Int = 192_000,
+    val audioSampleRate: Int = 44_100,
+    val iFrameIntervalSeconds: Int = 1  // GOP = 1 second = keyframe every 30 frames
 )
 
 data class ImageConfig(
@@ -39,32 +40,40 @@ data class ImageConfig(
 object PlatformPresets {
     fun getVideoConfig(platform: VideoPlatform, durationSeconds: Float = 15f): VideoConfig {
         return when (platform) {
+            // Instagram internal re-encodes at 5-8 Mbps.
+            // We output at 8 Mbps so after their re-encode, detail survives zoom.
             VideoPlatform.INSTAGRAM_REELS_STORY -> VideoConfig(
                 width = 1080,
                 height = 1920,
                 frameRate = 30,
-                targetBitrate = 4_500_000 // 4.5 Mbps IG sweet-spot
+                targetBitrate = 8_000_000
             )
+
+            // WhatsApp transcodes videos >16MB. We target <16MB total.
+            // Higher bitrate cap (6 Mbps) vs old 3.8 Mbps for sharper output.
             VideoPlatform.WHATSAPP_STATUS -> {
-                val maxAudioBytes = (128_000 / 8) * durationSeconds
-                val targetTotalBytes = 14.2 * 1024 * 1024
+                val maxAudioBytes = (192_000 / 8) * durationSeconds
+                val targetTotalBytes = 15.5 * 1024 * 1024  // ~15.5MB target, under 16MB
                 val availableVideoBytes = (targetTotalBytes - maxAudioBytes).coerceAtLeast(1_000_000.0)
                 val calculatedBitrate = ((availableVideoBytes * 8) / durationSeconds).toInt()
-                val finalBitrate = calculatedBitrate.coerceIn(1_800_000, 3_800_000)
+                // Higher cap: 6 Mbps. Short videos (<10s) get near-max bitrate.
+                val finalBitrate = calculatedBitrate.coerceIn(2_500_000, 6_000_000)
 
                 VideoConfig(
                     width = 1080,
                     height = 1920,
                     frameRate = 30,
                     targetBitrate = finalBitrate,
-                    maxFileSizeBytes = 15_000_000L
+                    maxFileSizeBytes = 16_000_000L
                 )
             }
+
+            // TikTok supports up to 15 Mbps. 12 Mbps gives excellent zoom quality.
             VideoPlatform.TIKTOK_HD -> VideoConfig(
                 width = 1080,
                 height = 1920,
                 frameRate = 30,
-                targetBitrate = 8_500_000
+                targetBitrate = 12_000_000
             )
         }
     }

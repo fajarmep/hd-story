@@ -29,7 +29,7 @@ object VideoOptimizer {
             outputFile.delete()
         }
 
-        // 1. Scale-to-fit with crop to target resolution
+        // 1. Scale-to-fit with crop to target 9:16 resolution
         val presentationEffect = Presentation.createForWidthAndHeight(
             config.width,
             config.height,
@@ -40,7 +40,7 @@ object VideoOptimizer {
             .setEffects(Effects(listOf(), listOf(presentationEffect)))
             .build()
 
-        // 2. H.264 High Profile L4.1 encoder
+        // 2. H.264 High Profile L4.1 with high bitrate + keyframe interval
         val videoEncoderSettings = VideoEncoderSettings.Builder()
             .setBitrate(config.targetBitrate)
             .setEncodingProfileLevel(
@@ -53,13 +53,14 @@ object VideoOptimizer {
             .setRequestedVideoEncoderSettings(videoEncoderSettings)
             .build()
 
-        // 3. Build Transformer with listener
+        // 3. Build Transformer
         val transformer = Transformer.Builder(context.applicationContext)
             .setVideoMimeType(MimeTypes.VIDEO_H264)
             .setAudioMimeType(MimeTypes.AUDIO_AAC)
             .setEncoderFactory(encoderFactory)
             .addListener(object : Transformer.Listener {
                 override fun onCompleted(composition: Composition, exportResult: ExportResult) {
+                    handler.removeCallbacksAndMessages(null)
                     if (continuation.isActive) {
                         onProgress(100)
                         continuation.resume(Result.success(outputFile))
@@ -71,6 +72,7 @@ object VideoOptimizer {
                     exportResult: ExportResult,
                     exportException: ExportException
                 ) {
+                    handler.removeCallbacksAndMessages(null)
                     if (continuation.isActive) {
                         continuation.resume(Result.failure(exportException))
                     }
@@ -78,7 +80,7 @@ object VideoOptimizer {
             })
             .build()
 
-        // 4. Poll progress via getProgress() every 500ms on main thread
+        // 4. Poll progress every 500ms
         val handler = Handler(Looper.getMainLooper())
         val progressHolder = ProgressHolder()
         val progressPoller = object : Runnable {
@@ -92,7 +94,7 @@ object VideoOptimizer {
             }
         }
 
-        // 5. Start
+        // 5. Start encoding
         try {
             transformer.start(editedMediaItem, outputFile.absolutePath)
             handler.postDelayed(progressPoller, 500)
@@ -103,7 +105,7 @@ object VideoOptimizer {
         }
 
         continuation.invokeOnCancellation {
-            handler.removeCallbacks(progressPoller)
+            handler.removeCallbacksAndMessages(null)
             try {
                 transformer.cancel()
             } catch (_: Exception) {}
