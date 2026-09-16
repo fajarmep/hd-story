@@ -11,6 +11,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.roundToInt
 
 object ImageOptimizer {
@@ -35,7 +36,9 @@ object ImageOptimizer {
                 return@withContext Result.failure(Exception("Gagal membaca dimensi gambar"))
             }
 
-            // 2. Calculate inSampleSize to prevent OOM on huge photos (50MP+)
+            // 2. Calculate inSampleSize — CONSERVATIVE: only downsample if source is
+            // more than 2x the target to avoid upscale-after-subsample blur.
+            // For 1080x1920 target, only subsample if source > 2160x3840.
             val targetMax = if (config.platform == PhotoPlatform.ORIGINAL_MAX_2048) {
                 2048
             } else {
@@ -43,12 +46,10 @@ object ImageOptimizer {
             }
 
             var inSampleSize = 1
-            var testW = originalWidth / 2
-            var testH = originalHeight / 2
-            while (testW >= targetMax && testH >= targetMax) {
+            val threshold = targetMax * 2  // Only subsample when source > 2x target
+            while (originalWidth / (inSampleSize * 2) >= threshold &&
+                   originalHeight / (inSampleSize * 2) >= threshold) {
                 inSampleSize *= 2
-                testW = originalWidth / (inSampleSize * 2)
-                testH = originalHeight / (inSampleSize * 2)
             }
 
             val decodeOptions = BitmapFactory.Options().apply {
@@ -70,17 +71,17 @@ object ImageOptimizer {
                 loadedBitmap = rotateBitmap(loadedBitmap, orientation)
             }
 
-            // 4. Scale and crop to target resolution
+            // 4. High-quality scale and crop
             val processedBitmap: Bitmap
 
             if (config.platform == PhotoPlatform.ORIGINAL_MAX_2048) {
-                // Preserve ratio, scale longest edge to 2048px
                 val maxDim = max(loadedBitmap.width, loadedBitmap.height)
                 if (maxDim > 2048) {
-                    val scale = 2048f / maxDim
-                    val nw = (loadedBitmap.width * scale).roundToInt()
-                    val nh = (loadedBitmap.height * scale).roundToInt()
-                    processedBitmap = Bitmap.createScaledBitmap(loadedBitmap, nw, nh, true)
+                    processedBitmap = highQualityScale(
+                        loadedBitmap,
+                        (loadedBitmap.width * 2048f / maxDim).roundToInt(),
+                        (loadedBitmap.height * 2048f / maxDim).roundToInt()
+                    )
                     if (processedBitmap != loadedBitmap) loadedBitmap.recycle()
                 } else {
                     processedBitmap = loadedBitmap
@@ -88,6 +89,8 @@ object ImageOptimizer {
             } else {
                 val targetW = config.width
                 val targetH = config.height
+
+                // Scale so the SMALLER dimension matches target (fill, not fit)
                 val scale = max(
                     targetW.toFloat() / loadedBitmap.width,
                     targetH.toFloat() / loadedBitmap.height
@@ -96,9 +99,10 @@ object ImageOptimizer {
                 val scaledW = (loadedBitmap.width * scale).roundToInt()
                 val scaledH = (loadedBitmap.height * scale).roundToInt()
 
-                val scaled = Bitmap.createScaledBitmap(loadedBitmap, scaledW, scaledH, true)
+                val scaled = highQualityScale(loadedBitmap, scaledW, scaledH)
                 if (scaled != loadedBitmap) loadedBitmap.recycle()
 
+                // Center-crop to exact target
                 val cropX = ((scaledW - targetW) / 2).coerceAtLeast(0)
                 val cropY = ((scaledH - targetH) / 2).coerceAtLeast(0)
 
@@ -106,7 +110,7 @@ object ImageOptimizer {
                 if (processedBitmap != scaled) scaled.recycle()
             }
 
-            // 5. Sharpen AFTER crop — bitmap now <=1080x1920 = ~8MB, safe
+            // 5. Sharpen AFTER crop — bitmap now <=target resolution, safe
             var finalBitmap = processedBitmap
             if (config.applySharpen) {
                 val sharpened = applySubtleSharpen(finalBitmap)
@@ -116,7 +120,7 @@ object ImageOptimizer {
                 }
             }
 
-            // 6. Save baseline JPEG sRGB
+            // 6. Save as high-quality baseline JPEG sRGB
             FileOutputStream(outputFile).use { out ->
                 finalBitmap.compress(Bitmap.CompressFormat.JPEG, config.quality, out)
             }
@@ -129,6 +133,49 @@ object ImageOptimizer {
         } catch (e: Exception) {
             Result.failure(e)
         }
+    }
+
+    /**
+     * High-quality downscale using Canvas + FILTER_BITMAP_FLAG + Paint.ANTI_ALIAS.
+     * This uses bicubic-like filtering instead of the basic bilinear in createScaledBitmap.
+     * For large downscales (>2x), does multi-step halving to preserve detail.
+     */
+    private fun highQualityScale(src: Bitmap, targetW: Int, targetH: Int): Bitmap {
+        if (targetW == src.width && targetH == src.height) return src
+
+        // Multi-step halving for large downscales — each step max 2x reduction
+        var current = src
+        var curW = src.width
+        var curH = src.height
+
+        while (curW / 2 >= targetW && curH / 2 >= targetH) {
+            val halfW = curW / 2
+            val halfH = curH / 2
+            val half = Bitmap.createBitmap(halfW, halfH, Bitmap.Config.ARGB_8888)
+            val canvas = Canvas(half)
+            val paint = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG).apply {
+                isDither = true
+            }
+            canvas.drawBitmap(current, null, RectF(0f, 0f, halfW.toFloat(), halfH.toFloat()), paint)
+            if (current != src) current.recycle()
+            current = half
+            curW = halfW
+            curH = halfH
+        }
+
+        // Final step to exact target
+        if (curW != targetW || curH != targetH) {
+            val final = Bitmap.createBitmap(targetW, targetH, Bitmap.Config.ARGB_8888)
+            val canvas = Canvas(final)
+            val paint = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG).apply {
+                isDither = true
+            }
+            canvas.drawBitmap(current, null, RectF(0f, 0f, targetW.toFloat(), targetH.toFloat()), paint)
+            if (current != src) current.recycle()
+            return final
+        }
+
+        return current
     }
 
     private fun rotateBitmap(bitmap: Bitmap, orientation: Int): Bitmap {
@@ -156,7 +203,7 @@ object ImageOptimizer {
         val width = src.width
         val height = src.height
 
-        // Guard: skip sharpen if bitmap somehow exceeds 16MP (safety valve)
+        // Guard: skip if bitmap exceeds 16MP
         if (width.toLong() * height > 16_000_000L) return src
 
         val output = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)

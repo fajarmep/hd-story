@@ -6,10 +6,10 @@ enum class MediaTypeTab {
 }
 
 enum class PhotoPlatform(val label: String, val width: Int, val height: Int, val quality: Int) {
-    IG_WA_STORY("WhatsApp Status & Instagram Story (9:16 - 1080x1920)", 1080, 1920, 92),
-    IG_FEED_PORTRAIT("Instagram Feed Portrait (4:5 - 1080x1350)", 1080, 1350, 92),
-    IG_FEED_SQUARE("Instagram Feed Square (1:1 - 1080x1080)", 1080, 1080, 92),
-    ORIGINAL_MAX_2048("Format Asli HD (Pertahankan Rasio - Max 2048px)", 0, 0, 94)
+    IG_WA_STORY("WhatsApp Status & Instagram Story (9:16 - 1080x1920)", 1080, 1920, 97),
+    IG_FEED_PORTRAIT("Instagram Feed Portrait (4:5 - 1080x1350)", 1080, 1350, 97),
+    IG_FEED_SQUARE("Instagram Feed Square (1:1 - 1080x1080)", 1080, 1080, 97),
+    ORIGINAL_MAX_2048("Format Asli HD (Pertahankan Rasio - Max 2048px)", 0, 0, 98)
 }
 
 enum class VideoPlatform(val label: String) {
@@ -32,7 +32,7 @@ data class ImageConfig(
     val platform: PhotoPlatform = PhotoPlatform.IG_WA_STORY,
     val width: Int = 1080,
     val height: Int = 1920,
-    val quality: Int = 92,
+    val quality: Int = 97,
     val applySharpen: Boolean = true
 )
 
