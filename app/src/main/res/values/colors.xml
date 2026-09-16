@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bg_dark">#0F1117</color>
+    <color name="surface_dark">#1A1D26</color>
+    <color name="surface_card">#222736</color>
+    <color name="primary_accent">#3B82F6</color>
+    <color name="primary_accent_hover">#2563EB</color>
+    <color name="gold_accent">#F59E0B</color>
+    <color name="text_primary">#F9FAFB</color>
+    <color name="text_secondary">#9CA3AF</color>
+    <color name="success_green">#10B981</color>
+    <color name="border_subtle">#374151</color>
+</resources>
