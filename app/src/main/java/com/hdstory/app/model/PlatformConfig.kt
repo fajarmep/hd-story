@@ -5,49 +5,47 @@ enum class MediaTypeTab {
     VIDEO
 }
 
-enum class PhotoTargetFormat(val label: String, val width: Int, val height: Int) {
-    STORY_VERTICAL("9:16 Story / Status Fullscreen (1080x1920)", 1080, 1920),
-    FEED_PORTRAIT("4:5 Feed Portrait IG (1080x1350)", 1080, 1350),
-    FEED_SQUARE("1:1 Feed Square (1080x1080)", 1080, 1080),
-    ORIGINAL_RES_HD("Pertahankan Rasio Asli (Max 2048px HD)", 0, 0)
+enum class PhotoPlatform(val label: String, val width: Int, val height: Int, val quality: Int) {
+    IG_WA_STORY("WhatsApp Status & Instagram Story (9:16 - 1080x1920)", 1080, 1920, 92),
+    IG_FEED_PORTRAIT("Instagram Feed Portrait (4:5 - 1080x1350)", 1080, 1350, 92),
+    IG_FEED_SQUARE("Instagram Feed Square (1:1 - 1080x1080)", 1080, 1080, 92),
+    ORIGINAL_MAX_2048("Format Asli HD (Pertahankan Rasio - Max 2048px)", 0, 0, 94)
 }
 
-enum class PlatformType {
-    INSTAGRAM,
-    WHATSAPP,
-    TIKTOK
+enum class VideoPlatform(val label: String) {
+    INSTAGRAM_REELS_STORY("Instagram (Story & Reels 1080p, 30fps)"),
+    WHATSAPP_STATUS("WhatsApp Status HD (<15MB Bypass Transcode)"),
+    TIKTOK_HD("TikTok HD (1080x1920, 8.5M High Motion)")
 }
 
 data class VideoConfig(
     val width: Int = 1080,
     val height: Int = 1920,
     val frameRate: Int = 30,
-    val targetBitrate: Int, // in bps
+    val targetBitrate: Int,
     val maxFileSizeBytes: Long = Long.MAX_VALUE,
     val audioBitrate: Int = 128_000,
     val audioSampleRate: Int = 44_100
 )
 
 data class ImageConfig(
-    val format: PhotoTargetFormat = PhotoTargetFormat.STORY_VERTICAL,
+    val platform: PhotoPlatform = PhotoPlatform.IG_WA_STORY,
     val width: Int = 1080,
     val height: Int = 1920,
     val quality: Int = 92,
-    val applySharpen: Boolean = true,
-    val paddingBlur: Boolean = false
+    val applySharpen: Boolean = true
 )
 
 object PlatformPresets {
-    fun getVideoConfig(platform: PlatformType, durationSeconds: Float = 15f): VideoConfig {
+    fun getVideoConfig(platform: VideoPlatform, durationSeconds: Float = 15f): VideoConfig {
         return when (platform) {
-            PlatformType.INSTAGRAM -> VideoConfig(
+            VideoPlatform.INSTAGRAM_REELS_STORY -> VideoConfig(
                 width = 1080,
                 height = 1920,
                 frameRate = 30,
                 targetBitrate = 4_500_000 // 4.5 Mbps IG sweet-spot
             )
-            PlatformType.WHATSAPP -> {
-                // WA Status hard limit ~16MB. We target 14.2 MB max.
+            VideoPlatform.WHATSAPP_STATUS -> {
                 val maxAudioBytes = (128_000 / 8) * durationSeconds
                 val targetTotalBytes = 14.2 * 1024 * 1024
                 val availableVideoBytes = (targetTotalBytes - maxAudioBytes).coerceAtLeast(1_000_000.0)
@@ -62,7 +60,7 @@ object PlatformPresets {
                     maxFileSizeBytes = 15_000_000L
                 )
             }
-            PlatformType.TIKTOK -> VideoConfig(
+            VideoPlatform.TIKTOK_HD -> VideoConfig(
                 width = 1080,
                 height = 1920,
                 frameRate = 30,
@@ -72,21 +70,14 @@ object PlatformPresets {
     }
 
     fun getImageConfig(
-        platform: PlatformType,
-        format: PhotoTargetFormat,
+        platform: PhotoPlatform,
         enableSharpen: Boolean = true
     ): ImageConfig {
-        val quality = when (platform) {
-            PlatformType.INSTAGRAM -> 92
-            PlatformType.WHATSAPP -> 90
-            PlatformType.TIKTOK -> 95
-        }
-
         return ImageConfig(
-            format = format,
-            width = format.width,
-            height = format.height,
-            quality = quality,
+            platform = platform,
+            width = platform.width,
+            height = platform.height,
+            quality = platform.quality,
             applySharpen = enableSharpen
         )
     }

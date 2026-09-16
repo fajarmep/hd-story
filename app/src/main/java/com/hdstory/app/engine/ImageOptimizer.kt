@@ -5,7 +5,7 @@ import android.graphics.*
 import android.net.Uri
 import androidx.exifinterface.media.ExifInterface
 import com.hdstory.app.model.ImageConfig
-import com.hdstory.app.model.PhotoTargetFormat
+import com.hdstory.app.model.PhotoPlatform
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -31,7 +31,7 @@ object ImageOptimizer {
             val originalWidth = boundsOptions.outWidth
             val originalHeight = boundsOptions.outHeight
 
-            val targetTargetMax = if (config.format == PhotoTargetFormat.ORIGINAL_RES_HD) 2048 else max(config.width, config.height)
+            val targetTargetMax = if (config.platform == PhotoPlatform.ORIGINAL_MAX_2048) 2048 else max(config.width, config.height)
 
             var inSampleSize = 1
             while (originalWidth / (inSampleSize * 2) >= targetTargetMax && originalHeight / (inSampleSize * 2) >= targetTargetMax) {
@@ -56,7 +56,7 @@ object ImageOptimizer {
 
             val processedBitmap: Bitmap
 
-            if (config.format == PhotoTargetFormat.ORIGINAL_RES_HD) {
+            if (config.platform == PhotoPlatform.ORIGINAL_MAX_2048) {
                 // Keep original aspect ratio, scale longest edge to 2048px (WhatsApp HD sweet spot)
                 val maxDim = max(loadedBitmap.width, loadedBitmap.height)
                 if (maxDim > 2048) {
@@ -69,7 +69,7 @@ object ImageOptimizer {
                     processedBitmap = loadedBitmap
                 }
             } else {
-                // Fixed target resolution (e.g. 1080x1920 or 1080x1350 or 1080x1080)
+                // Fixed target resolution (e.g. 1080x1920, 1080x1350, 1080x1080)
                 val targetW = config.width
                 val targetH = config.height
                 val scale = max(targetW.toFloat() / loadedBitmap.width, targetH.toFloat() / loadedBitmap.height)
@@ -141,7 +141,6 @@ object ImageOptimizer {
 
         val weight = 0.28f
 
-        // Copy top & bottom boundary lines
         System.arraycopy(pixels, 0, outPixels, 0, width)
         System.arraycopy(pixels, (height - 1) * width, outPixels, (height - 1) * width, width)
 

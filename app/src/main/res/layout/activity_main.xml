@@ -13,12 +13,13 @@
         android:orientation="vertical"
         android:padding="20dp">
 
-        <!-- Modern Header with Logo -->
+        <!-- Header: Sharp, flat, 0dp rounded -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:paddingBottom="16dp">
 
             <ImageView
                 android:layout_width="48dp"
@@ -53,12 +54,12 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- Mode Switch Tabs: FOTO vs VIDEO -->
+        <!-- Mode Switch: 0dp corner, 0dp elevation -->
         <com.google.android.material.button.MaterialButtonToggleGroup
             android:id="@+id/toggleMediaType"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="12dp"
             app:checkedButton="@id/btnTabPhoto"
             app:selectionRequired="true"
             app:singleSelection="true">
@@ -72,7 +73,7 @@
                 android:fontFamily="sans-serif-bold"
                 android:text="@string/tab_photo"
                 android:textSize="13sp"
-                app:cornerRadius="14dp" />
+                app:cornerRadius="0dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnTabVideo"
@@ -83,17 +84,18 @@
                 android:fontFamily="sans-serif-bold"
                 android:text="@string/tab_video"
                 android:textSize="13sp"
-                app:cornerRadius="14dp" />
+                app:cornerRadius="0dp" />
         </com.google.android.material.button.MaterialButtonToggleGroup>
 
-        <!-- Platform Preset Card -->
+        <!-- PHOTO TARGET PLATFORM CARD: 0dp corner, 0dp elevation, no shadow -->
         <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardPhotoTargets"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             app:cardBackgroundColor="@color/surface_card"
-            app:cardCornerRadius="20dp"
-            app:cardElevation="2dp"
+            app:cardCornerRadius="0dp"
+            app:cardElevation="0dp"
             app:strokeColor="@color/border_subtle"
             app:strokeWidth="1.2dp">
 
@@ -101,69 +103,81 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="18dp">
+                android:padding="16dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="sans-serif-bold"
                     android:letterSpacing="0.08"
-                    android:text="@string/target_platform"
+                    android:text="TARGET FORMAT FOTO HD"
                     android:textColor="@color/primary_accent"
                     android:textSize="12sp" />
 
                 <RadioGroup
-                    android:id="@+id/rgPlatform"
+                    android:id="@+id/rgPhotoTarget"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp">
 
                     <RadioButton
-                        android:id="@+id/rbInstagram"
+                        android:id="@+id/rbPhotoStory"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:buttonTint="@color/primary_accent"
                         android:checked="true"
                         android:fontFamily="sans-serif-medium"
                         android:padding="8dp"
-                        android:text="Instagram (Story, Reels, Feed HD)"
+                        android:text="WhatsApp Status &amp; IG Story (9:16 - 1080x1920)"
                         android:textColor="@color/text_primary"
-                        android:textSize="14sp" />
+                        android:textSize="13sp" />
 
                     <RadioButton
-                        android:id="@+id/rbWhatsApp"
+                        android:id="@+id/rbPhotoPortrait"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:buttonTint="@color/primary_accent"
                         android:fontFamily="sans-serif-medium"
                         android:padding="8dp"
-                        android:text="WhatsApp Status HD (Bypass Transcode)"
+                        android:text="Instagram Feed Portrait (4:5 - 1080x1350)"
                         android:textColor="@color/text_primary"
-                        android:textSize="14sp" />
+                        android:textSize="13sp" />
 
                     <RadioButton
-                        android:id="@+id/rbTikTok"
+                        android:id="@+id/rbPhotoSquare"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:buttonTint="@color/primary_accent"
                         android:fontFamily="sans-serif-medium"
                         android:padding="8dp"
-                        android:text="TikTok HD (High Motion Clarity)"
+                        android:text="Instagram Feed Square (1:1 - 1080x1080)"
                         android:textColor="@color/text_primary"
-                        android:textSize="14sp" />
+                        android:textSize="13sp" />
+
+                    <RadioButton
+                        android:id="@+id/rbPhotoOriginal"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:buttonTint="@color/primary_accent"
+                        android:fontFamily="sans-serif-medium"
+                        android:padding="8dp"
+                        android:text="Format Asli HD (Rasio Asli - Max 2048px)"
+                        android:textColor="@color/text_primary"
+                        android:textSize="13sp" />
                 </RadioGroup>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Photo Ratio Selector Card (Visible only in Photo mode) -->
+        <!-- VIDEO TARGET PLATFORM CARD: 0dp corner, 0dp elevation, no shadow -->
         <com.google.android.material.card.MaterialCardView
-            android:id="@+id/cardPhotoRatio"
+            android:id="@+id/cardVideoTargets"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
+            android:visibility="gone"
             app:cardBackgroundColor="@color/surface_card"
-            app:cardCornerRadius="20dp"
-            app:cardElevation="2dp"
+            app:cardCornerRadius="0dp"
+            app:cardElevation="0dp"
             app:strokeColor="@color/border_subtle"
             app:strokeWidth="1.2dp">
 
@@ -171,79 +185,68 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="18dp">
+                android:padding="16dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="sans-serif-bold"
                     android:letterSpacing="0.08"
-                    android:text="@string/photo_aspect_title"
-                    android:textColor="@color/gold_accent"
+                    android:text="TARGET PLATFORM VIDEO HD"
+                    android:textColor="@color/primary_accent"
                     android:textSize="12sp" />
 
                 <RadioGroup
-                    android:id="@+id/rgPhotoAspect"
+                    android:id="@+id/rgVideoTarget"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp">
 
                     <RadioButton
-                        android:id="@+id/rbRatioStory"
+                        android:id="@+id/rbVideoInstagram"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:buttonTint="@color/gold_accent"
+                        android:buttonTint="@color/primary_accent"
                         android:checked="true"
                         android:fontFamily="sans-serif-medium"
                         android:padding="8dp"
-                        android:text="9:16 Fullscreen Story / Status (1080x1920)"
+                        android:text="Instagram (Story &amp; Reels 1080p, 30fps, 4.5M)"
                         android:textColor="@color/text_primary"
                         android:textSize="13sp" />
 
                     <RadioButton
-                        android:id="@+id/rbRatioPortrait"
+                        android:id="@+id/rbVideoWhatsApp"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:buttonTint="@color/gold_accent"
+                        android:buttonTint="@color/primary_accent"
                         android:fontFamily="sans-serif-medium"
                         android:padding="8dp"
-                        android:text="4:5 Portrait Feed IG (1080x1350)"
+                        android:text="WhatsApp Status HD (&lt;15MB Bypass Transcode)"
                         android:textColor="@color/text_primary"
                         android:textSize="13sp" />
 
                     <RadioButton
-                        android:id="@+id/rbRatioSquare"
+                        android:id="@+id/rbVideoTikTok"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:buttonTint="@color/gold_accent"
+                        android:buttonTint="@color/primary_accent"
                         android:fontFamily="sans-serif-medium"
                         android:padding="8dp"
-                        android:text="1:1 Square Feed (1080x1080)"
-                        android:textColor="@color/text_primary"
-                        android:textSize="13sp" />
-
-                    <RadioButton
-                        android:id="@+id/rbRatioOriginal"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:buttonTint="@color/gold_accent"
-                        android:fontFamily="sans-serif-medium"
-                        android:padding="8dp"
-                        android:text="Rasio Asli Foto (Optimasi Tajam Max 2048px)"
+                        android:text="TikTok HD (1080x1920, 8.5M High Motion)"
                         android:textColor="@color/text_primary"
                         android:textSize="13sp" />
                 </RadioGroup>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Media Picker & Preview Card -->
+        <!-- Media Picker & Preview Card: 0dp corner, 0dp elevation, no shadow -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             app:cardBackgroundColor="@color/surface_card"
-            app:cardCornerRadius="20dp"
-            app:cardElevation="2dp"
+            app:cardCornerRadius="0dp"
+            app:cardElevation="0dp"
             app:strokeColor="@color/border_subtle"
             app:strokeWidth="1.2dp">
 
@@ -252,7 +255,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:orientation="vertical"
-                android:padding="22dp">
+                android:padding="20dp">
 
                 <ImageView
                     android:id="@+id/ivPreview"
@@ -277,23 +280,23 @@
                     android:id="@+id/btnSelectMedia"
                     style="@style/Widget.Material3.Button.TonalButton"
                     android:layout_width="match_parent"
-                    android:layout_height="52dp"
+                    android:layout_height="50dp"
                     android:layout_marginTop="16dp"
                     android:fontFamily="sans-serif-bold"
                     android:text="@string/select_photo"
                     android:textSize="13sp"
-                    app:cornerRadius="14dp" />
+                    app:cornerRadius="0dp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Advanced Tuning Switches -->
+        <!-- Advanced Tuning Card: 0dp corner, 0dp elevation, no shadow -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             app:cardBackgroundColor="@color/surface_card"
-            app:cardCornerRadius="20dp"
-            app:cardElevation="2dp"
+            app:cardCornerRadius="0dp"
+            app:cardElevation="0dp"
             app:strokeColor="@color/border_subtle"
             app:strokeWidth="1.2dp">
 
@@ -301,7 +304,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="18dp">
+                android:padding="16dp">
 
                 <com.google.android.material.materialswitch.MaterialSwitch
                     android:id="@+id/switchSharpen"
@@ -326,27 +329,28 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Main Action Button -->
+        <!-- Action Button: 0dp corner, 0dp elevation -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnOptimize"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:layout_marginTop="22dp"
+            android:layout_height="54dp"
+            android:layout_marginTop="20dp"
             android:backgroundTint="@color/primary_accent"
-            android:elevation="4dp"
+            android:elevation="0dp"
+            app:elevation="0dp"
             android:enabled="false"
             android:fontFamily="sans-serif-black"
             android:letterSpacing="0.04"
             android:text="@string/btn_optimize_photo"
             android:textColor="#FFFFFF"
-            android:textSize="15sp"
-            app:cornerRadius="16dp" />
+            android:textSize="14sp"
+            app:cornerRadius="0dp" />
 
         <ProgressBar
             android:id="@+id/progressBar"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
-            android:layout_height="8dp"
+            android:layout_height="6dp"
             android:layout_marginTop="16dp"
             android:indeterminate="true"
             android:visibility="gone" />
@@ -362,7 +366,7 @@
             android:textColor="@color/text_secondary"
             android:textSize="13sp" />
 
-        <!-- Export Actions (Shown on Done) -->
+        <!-- Export Actions: 0dp corner, 0dp elevation -->
         <LinearLayout
             android:id="@+id/layoutExportActions"
             android:layout_width="match_parent"
@@ -374,25 +378,29 @@
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnShare"
                 android:layout_width="match_parent"
-                android:layout_height="52dp"
+                android:layout_height="50dp"
                 android:backgroundTint="@color/success_green"
+                android:elevation="0dp"
+                app:elevation="0dp"
                 android:fontFamily="sans-serif-bold"
                 android:text="@string/btn_share"
                 android:textColor="#FFFFFF"
                 android:textSize="14sp"
-                app:cornerRadius="14dp" />
+                app:cornerRadius="0dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSave"
                 style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="match_parent"
-                android:layout_height="52dp"
+                android:layout_height="50dp"
                 android:layout_marginTop="10dp"
+                android:elevation="0dp"
+                app:elevation="0dp"
                 android:fontFamily="sans-serif-medium"
                 android:text="@string/btn_save"
                 android:textColor="@color/text_primary"
                 android:textSize="14sp"
-                app:cornerRadius="14dp"
+                app:cornerRadius="0dp"
                 app:strokeColor="@color/border_subtle" />
         </LinearLayout>
 

@@ -14,9 +14,9 @@ import com.hdstory.app.databinding.ActivityMainBinding
 import com.hdstory.app.engine.ImageOptimizer
 import com.hdstory.app.engine.VideoOptimizer
 import com.hdstory.app.model.MediaTypeTab
-import com.hdstory.app.model.PhotoTargetFormat
+import com.hdstory.app.model.PhotoPlatform
 import com.hdstory.app.model.PlatformPresets
-import com.hdstory.app.model.PlatformType
+import com.hdstory.app.model.VideoPlatform
 import com.hdstory.app.utils.FileUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -72,12 +72,14 @@ class MainActivity : AppCompatActivity() {
         binding.tvMediaInfo.text = getString(R.string.no_media_selected)
 
         if (tab == MediaTypeTab.PHOTO) {
-            binding.cardPhotoRatio.visibility = View.VISIBLE
+            binding.cardPhotoTargets.visibility = View.VISIBLE
+            binding.cardVideoTargets.visibility = View.GONE
             binding.switchFpsLock.visibility = View.GONE
             binding.btnSelectMedia.text = getString(R.string.select_photo)
             binding.btnOptimize.text = getString(R.string.btn_optimize_photo)
         } else {
-            binding.cardPhotoRatio.visibility = View.GONE
+            binding.cardPhotoTargets.visibility = View.GONE
+            binding.cardVideoTargets.visibility = View.VISIBLE
             binding.switchFpsLock.visibility = View.VISIBLE
             binding.btnSelectMedia.text = getString(R.string.select_video)
             binding.btnOptimize.text = getString(R.string.btn_optimize_video)
@@ -141,6 +143,7 @@ class MainActivity : AppCompatActivity() {
         if (isVideo) {
             val duration = FileUtils.getVideoDurationSeconds(this, uri)
             binding.tvMediaInfo.text = "Video dipilih: %.1f dtk (Target 9:16 1080p)".format(duration)
+            binding.ivPreview.visibility = View.GONE
         } else {
             binding.tvMediaInfo.text = "Foto dipilih: Siap dioptimasi HD & Anti-Pecah"
             binding.ivPreview.setImageURI(uri)
@@ -153,25 +156,24 @@ class MainActivity : AppCompatActivity() {
         binding.tvStatus.text = getString(R.string.status_ready)
     }
 
-    private fun getSelectedPlatform(): PlatformType {
-        return when (binding.rgPlatform.checkedRadioButtonId) {
-            R.id.rbWhatsApp -> PlatformType.WHATSAPP
-            R.id.rbTikTok -> PlatformType.TIKTOK
-            else -> PlatformType.INSTAGRAM
+    private fun getSelectedPhotoPlatform(): PhotoPlatform {
+        return when (binding.rgPhotoTarget.checkedRadioButtonId) {
+            R.id.rbPhotoPortrait -> PhotoPlatform.IG_FEED_PORTRAIT
+            R.id.rbPhotoSquare -> PhotoPlatform.IG_FEED_SQUARE
+            R.id.rbPhotoOriginal -> PhotoPlatform.ORIGINAL_MAX_2048
+            else -> PhotoPlatform.IG_WA_STORY
         }
     }
 
-    private fun getSelectedPhotoFormat(): PhotoTargetFormat {
-        return when (binding.rgPhotoAspect.checkedRadioButtonId) {
-            R.id.rbRatioPortrait -> PhotoTargetFormat.FEED_PORTRAIT
-            R.id.rbRatioSquare -> PhotoTargetFormat.FEED_SQUARE
-            R.id.rbRatioOriginal -> PhotoTargetFormat.ORIGINAL_RES_HD
-            else -> PhotoTargetFormat.STORY_VERTICAL
+    private fun getSelectedVideoPlatform(): VideoPlatform {
+        return when (binding.rgVideoTarget.checkedRadioButtonId) {
+            R.id.rbVideoWhatsApp -> VideoPlatform.WHATSAPP_STATUS
+            R.id.rbVideoTikTok -> VideoPlatform.TIKTOK_HD
+            else -> VideoPlatform.INSTAGRAM_REELS_STORY
         }
     }
 
     private fun startOptimization(uri: Uri) {
-        val platform = getSelectedPlatform()
         val applySharpen = binding.switchSharpen.isChecked
 
         binding.btnOptimize.isEnabled = false
@@ -184,6 +186,7 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 if (currentTab == MediaTypeTab.VIDEO) {
+                    val platform = getSelectedVideoPlatform()
                     val duration = FileUtils.getVideoDurationSeconds(this@MainActivity, uri)
                     val config = PlatformPresets.getVideoConfig(platform, duration)
                     val out = File(cacheDir, "HDStory_video_${System.currentTimeMillis()}.mp4")
@@ -200,8 +203,8 @@ class MainActivity : AppCompatActivity() {
                     )
                     handleResult(result)
                 } else {
-                    val photoFormat = getSelectedPhotoFormat()
-                    val config = PlatformPresets.getImageConfig(platform, photoFormat, applySharpen)
+                    val platform = getSelectedPhotoPlatform()
+                    val config = PlatformPresets.getImageConfig(platform, applySharpen)
                     val out = File(cacheDir, "HDStory_photo_${System.currentTimeMillis()}.jpg")
 
                     val result = ImageOptimizer.optimizeImage(
