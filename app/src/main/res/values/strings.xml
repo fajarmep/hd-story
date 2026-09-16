@@ -1,23 +1,30 @@
 <resources>
     <string name="app_name">HD Story</string>
-    <string name="title_sub">Anti-Blur Social Media Story Optimizer</string>
-    <string name="target_platform">Target Platform</string>
-    <string name="preset_ig">Instagram (Story / Reels)</string>
-    <string name="preset_wa">WhatsApp Status HD</string>
-    <string name="preset_tiktok">TikTok HD</string>
+    <string name="title_sub">Anti-Blur Social Media Story &amp; Media Optimizer</string>
+    
+    <string name="tab_photo">OPTIMASI FOTO</string>
+    <string name="tab_video">OPTIMASI VIDEO</string>
 
-    <string name="select_media">PILIH MEDIA (FOTO / VIDEO)</string>
+    <string name="target_platform">Target Platform</string>
+    <string name="photo_aspect_title">Format Rasio Foto</string>
+
+    <string name="select_photo">PILIH FOTO DARI GALERI</string>
+    <string name="select_video">PILIH VIDEO DARI GALERI</string>
     <string name="change_media">GANTI MEDIA</string>
     <string name="no_media_selected">Belum ada media dipilih</string>
 
+    <!-- Tuning Options -->
     <string name="option_sharpen">Smart Edge Sharpening (Lawan Blur Kompresi)</string>
-    <string name="option_aspect">Kunci Aspek Rasio 9:16 (1080x1920)</string>
+    <string name="option_video_aspect">Kunci Aspek Rasio 9:16 (1080x1920)</string>
     <string name="option_fps">Kunci 30 FPS (Alokasi Bitrate Maksimal)</string>
 
-    <string name="btn_optimize">OPTIMALKAN MEDIA (HD EXPORT)</string>
+    <!-- Actions -->
+    <string name="btn_optimize_photo">OPTIMALKAN FOTO HD</string>
+    <string name="btn_optimize_video">OPTIMALKAN VIDEO HD</string>
     <string name="btn_share">BAGIKAN KE SOSIAL MEDIA</string>
     <string name="btn_save">SIMPAN KE GALERI</string>
 
+    <!-- Status -->
     <string name="status_ready">Siap mengoptimalkan media</string>
     <string name="status_processing">Memproses optimasi HD…</string>
     <string name="status_done">Selesai! Media sudah dioptimalkan tanpa pecah.</string>

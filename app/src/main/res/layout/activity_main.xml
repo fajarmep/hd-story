@@ -13,7 +13,7 @@
         android:orientation="vertical"
         android:padding="20dp">
 
-        <!-- Modern Sleek Header with Icon -->
+        <!-- Modern Header with Logo -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -53,11 +53,44 @@
             </LinearLayout>
         </LinearLayout>
 
+        <!-- Mode Switch Tabs: FOTO vs VIDEO -->
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/toggleMediaType"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            app:checkedButton="@id/btnTabPhoto"
+            app:selectionRequired="true"
+            app:singleSelection="true">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnTabPhoto"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:fontFamily="sans-serif-bold"
+                android:text="@string/tab_photo"
+                android:textSize="13sp"
+                app:cornerRadius="14dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnTabVideo"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:fontFamily="sans-serif-bold"
+                android:text="@string/tab_video"
+                android:textSize="13sp"
+                app:cornerRadius="14dp" />
+        </com.google.android.material.button.MaterialButtonToggleGroup>
+
         <!-- Platform Preset Card -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="22dp"
+            android:layout_marginTop="16dp"
             app:cardBackgroundColor="@color/surface_card"
             app:cardCornerRadius="20dp"
             app:cardElevation="2dp"
@@ -83,7 +116,7 @@
                     android:id="@+id/rgPlatform"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp">
+                    android:layout_marginTop="10dp">
 
                     <RadioButton
                         android:id="@+id/rbInstagram"
@@ -92,8 +125,8 @@
                         android:buttonTint="@color/primary_accent"
                         android:checked="true"
                         android:fontFamily="sans-serif-medium"
-                        android:padding="10dp"
-                        android:text="Instagram (Story &amp; Reels 1080p, 30fps)"
+                        android:padding="8dp"
+                        android:text="Instagram (Story, Reels, Feed HD)"
                         android:textColor="@color/text_primary"
                         android:textSize="14sp" />
 
@@ -103,8 +136,8 @@
                         android:layout_height="wrap_content"
                         android:buttonTint="@color/primary_accent"
                         android:fontFamily="sans-serif-medium"
-                        android:padding="10dp"
-                        android:text="WhatsApp Status HD (&lt;15MB Dynamic Bitrate)"
+                        android:padding="8dp"
+                        android:text="WhatsApp Status HD (Bypass Transcode)"
                         android:textColor="@color/text_primary"
                         android:textSize="14sp" />
 
@@ -114,10 +147,91 @@
                         android:layout_height="wrap_content"
                         android:buttonTint="@color/primary_accent"
                         android:fontFamily="sans-serif-medium"
-                        android:padding="10dp"
-                        android:text="TikTok HD (1080x1920, 8.5M High Motion)"
+                        android:padding="8dp"
+                        android:text="TikTok HD (High Motion Clarity)"
                         android:textColor="@color/text_primary"
                         android:textSize="14sp" />
+                </RadioGroup>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Photo Ratio Selector Card (Visible only in Photo mode) -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardPhotoRatio"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:cardBackgroundColor="@color/surface_card"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="2dp"
+            app:strokeColor="@color/border_subtle"
+            app:strokeWidth="1.2dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="18dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif-bold"
+                    android:letterSpacing="0.08"
+                    android:text="@string/photo_aspect_title"
+                    android:textColor="@color/gold_accent"
+                    android:textSize="12sp" />
+
+                <RadioGroup
+                    android:id="@+id/rgPhotoAspect"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp">
+
+                    <RadioButton
+                        android:id="@+id/rbRatioStory"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:buttonTint="@color/gold_accent"
+                        android:checked="true"
+                        android:fontFamily="sans-serif-medium"
+                        android:padding="8dp"
+                        android:text="9:16 Fullscreen Story / Status (1080x1920)"
+                        android:textColor="@color/text_primary"
+                        android:textSize="13sp" />
+
+                    <RadioButton
+                        android:id="@+id/rbRatioPortrait"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:buttonTint="@color/gold_accent"
+                        android:fontFamily="sans-serif-medium"
+                        android:padding="8dp"
+                        android:text="4:5 Portrait Feed IG (1080x1350)"
+                        android:textColor="@color/text_primary"
+                        android:textSize="13sp" />
+
+                    <RadioButton
+                        android:id="@+id/rbRatioSquare"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:buttonTint="@color/gold_accent"
+                        android:fontFamily="sans-serif-medium"
+                        android:padding="8dp"
+                        android:text="1:1 Square Feed (1080x1080)"
+                        android:textColor="@color/text_primary"
+                        android:textSize="13sp" />
+
+                    <RadioButton
+                        android:id="@+id/rbRatioOriginal"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:buttonTint="@color/gold_accent"
+                        android:fontFamily="sans-serif-medium"
+                        android:padding="8dp"
+                        android:text="Rasio Asli Foto (Optimasi Tajam Max 2048px)"
+                        android:textColor="@color/text_primary"
+                        android:textSize="13sp" />
                 </RadioGroup>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -142,8 +256,8 @@
 
                 <ImageView
                     android:id="@+id/ivPreview"
-                    android:layout_width="120dp"
-                    android:layout_height="213dp"
+                    android:layout_width="140dp"
+                    android:layout_height="240dp"
                     android:background="@color/surface_card_secondary"
                     android:scaleType="centerCrop"
                     android:visibility="gone"
@@ -166,13 +280,13 @@
                     android:layout_height="52dp"
                     android:layout_marginTop="16dp"
                     android:fontFamily="sans-serif-bold"
-                    android:text="@string/select_media"
+                    android:text="@string/select_photo"
                     android:textSize="13sp"
                     app:cornerRadius="14dp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Tuning Options Card -->
+        <!-- Advanced Tuning Switches -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -200,17 +314,6 @@
                     android:textSize="13sp" />
 
                 <com.google.android.material.materialswitch.MaterialSwitch
-                    android:id="@+id/switchAspect"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:checked="true"
-                    android:fontFamily="sans-serif-medium"
-                    android:text="@string/option_aspect"
-                    android:textColor="@color/text_primary"
-                    android:textSize="13sp" />
-
-                <com.google.android.material.materialswitch.MaterialSwitch
                     android:id="@+id/switchFpsLock"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -223,7 +326,7 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Main Optimize Button -->
+        <!-- Main Action Button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnOptimize"
             android:layout_width="match_parent"
@@ -234,7 +337,7 @@
             android:enabled="false"
             android:fontFamily="sans-serif-black"
             android:letterSpacing="0.04"
-            android:text="@string/btn_optimize"
+            android:text="@string/btn_optimize_photo"
             android:textColor="#FFFFFF"
             android:textSize="15sp"
             app:cornerRadius="16dp" />

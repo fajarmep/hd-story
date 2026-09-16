@@ -5,6 +5,7 @@ import android.graphics.*
 import android.net.Uri
 import androidx.exifinterface.media.ExifInterface
 import com.hdstory.app.model.ImageConfig
+import com.hdstory.app.model.PhotoTargetFormat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -22,17 +23,18 @@ object ImageOptimizer {
     ): Result<File> = withContext(Dispatchers.IO) {
         try {
             // 1. Decode bounds and EXIF orientation
-            val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+            val boundsOptions = BitmapFactory.Options().apply { inJustDecodeBounds = true }
             context.contentResolver.openInputStream(inputUri)?.use {
-                BitmapFactory.decodeStream(it, null, options)
+                BitmapFactory.decodeStream(it, null, boundsOptions)
             }
 
-            val originalWidth = options.outWidth
-            val originalHeight = options.outHeight
+            val originalWidth = boundsOptions.outWidth
+            val originalHeight = boundsOptions.outHeight
 
-            // Sample size to avoid OOM
+            val targetTargetMax = if (config.format == PhotoTargetFormat.ORIGINAL_RES_HD) 2048 else max(config.width, config.height)
+
             var inSampleSize = 1
-            while (originalWidth / (inSampleSize * 2) >= config.width && originalHeight / (inSampleSize * 2) >= config.height) {
+            while (originalWidth / (inSampleSize * 2) >= targetTargetMax && originalHeight / (inSampleSize * 2) >= targetTargetMax) {
                 inSampleSize *= 2
             }
 
@@ -45,35 +47,48 @@ object ImageOptimizer {
                 BitmapFactory.decodeStream(it, null, decodeOptions)
             } ?: return@withContext Result.failure(Exception("Gagal membuka file gambar"))
 
-            // Handle EXIF rotation
+            // Handle EXIF orientation rotation
             context.contentResolver.openInputStream(inputUri)?.use { stream ->
                 val exif = ExifInterface(stream)
                 val orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
                 loadedBitmap = rotateBitmap(loadedBitmap, orientation)
             }
 
-            // 2. Scale & Center-Crop to exact 1080x1920 (9:16)
-            val targetWidth = config.width
-            val targetHeight = config.height
-            val scale = max(targetWidth.toFloat() / loadedBitmap.width, targetHeight.toFloat() / loadedBitmap.height)
+            val processedBitmap: Bitmap
 
-            val scaledWidth = (loadedBitmap.width * scale).roundToInt()
-            val scaledHeight = (loadedBitmap.height * scale).roundToInt()
+            if (config.format == PhotoTargetFormat.ORIGINAL_RES_HD) {
+                // Keep original aspect ratio, scale longest edge to 2048px (WhatsApp HD sweet spot)
+                val maxDim = max(loadedBitmap.width, loadedBitmap.height)
+                if (maxDim > 2048) {
+                    val scale = 2048f / maxDim
+                    val nw = (loadedBitmap.width * scale).roundToInt()
+                    val nh = (loadedBitmap.height * scale).roundToInt()
+                    processedBitmap = Bitmap.createScaledBitmap(loadedBitmap, nw, nh, true)
+                    if (processedBitmap != loadedBitmap) loadedBitmap.recycle()
+                } else {
+                    processedBitmap = loadedBitmap
+                }
+            } else {
+                // Fixed target resolution (e.g. 1080x1920 or 1080x1350 or 1080x1080)
+                val targetW = config.width
+                val targetH = config.height
+                val scale = max(targetW.toFloat() / loadedBitmap.width, targetH.toFloat() / loadedBitmap.height)
 
-            val scaledBitmap = Bitmap.createScaledBitmap(loadedBitmap, scaledWidth, scaledHeight, true)
-            if (scaledBitmap != loadedBitmap) {
-                loadedBitmap.recycle()
+                val scaledW = (loadedBitmap.width * scale).roundToInt()
+                val scaledH = (loadedBitmap.height * scale).roundToInt()
+
+                val scaled = Bitmap.createScaledBitmap(loadedBitmap, scaledW, scaledH, true)
+                if (scaled != loadedBitmap) loadedBitmap.recycle()
+
+                val cropX = ((scaledW - targetW) / 2).coerceAtLeast(0)
+                val cropY = ((scaledH - targetH) / 2).coerceAtLeast(0)
+
+                processedBitmap = Bitmap.createBitmap(scaled, cropX, cropY, targetW, targetH)
+                if (processedBitmap != scaled) scaled.recycle()
             }
 
-            val cropX = ((scaledWidth - targetWidth) / 2).coerceAtLeast(0)
-            val cropY = ((scaledHeight - targetHeight) / 2).coerceAtLeast(0)
-
-            var finalBitmap = Bitmap.createBitmap(scaledBitmap, cropX, cropY, targetWidth, targetHeight)
-            if (finalBitmap != scaledBitmap) {
-                scaledBitmap.recycle()
-            }
-
-            // 3. Apply Smart Unsharp Mask / Sharpening if enabled
+            // 3. Smart Edge Sharpening (Crucial for Instagram/WhatsApp photo preservation)
+            var finalBitmap = processedBitmap
             if (config.applySharpen) {
                 val sharpened = applySubtleSharpen(finalBitmap)
                 if (sharpened != finalBitmap) {
@@ -82,7 +97,7 @@ object ImageOptimizer {
                 }
             }
 
-            // 4. Save to JPEG with clean sRGB quantization
+            // 4. Save to baseline JPEG with clean 4:2:0 / 4:4:4 quantization matrix
             FileOutputStream(outputFile).use { out ->
                 finalBitmap.compress(Bitmap.CompressFormat.JPEG, config.quality, out)
             }
@@ -112,33 +127,31 @@ object ImageOptimizer {
     }
 
     /**
-     * Subtle unsharp convolution kernel to boost edge contrast.
-     * Prevents social media bilinear downsampling from washing away edge clarity.
+     * Laplacian 3x3 unsharp convolution kernel with 0.28 weight.
+     * Prevents social media downsampling and JPEG re-quantization from washing away edges.
      */
     private fun applySubtleSharpen(src: Bitmap): Bitmap {
         val width = src.width
         val height = src.height
         val output = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
 
-        // 3x3 Laplacian sharpening filter with weight 0.25 (mild, zero-halos)
-        // [  0, -0.25,  0  ]
-        // [ -0.25, 2.0, -0.25 ]
-        // [  0, -0.25,  0  ]
-        val paint = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG)
-        val canvas = Canvas(output)
-        canvas.drawBitmap(src, 0f, 0f, paint)
-
         val pixels = IntArray(width * height)
         src.getPixels(pixels, 0, width, 0, 0, width, height)
         val outPixels = IntArray(width * height)
 
-        val weight = 0.25f
+        val weight = 0.28f
+
+        // Copy top & bottom boundary lines
+        System.arraycopy(pixels, 0, outPixels, 0, width)
+        System.arraycopy(pixels, (height - 1) * width, outPixels, (height - 1) * width, width)
 
         for (y in 1 until height - 1) {
             val offset = y * width
+            outPixels[offset] = pixels[offset]
+            outPixels[offset + width - 1] = pixels[offset + width - 1]
+
             for (x in 1 until width - 1) {
                 val idx = offset + x
-
                 val cCenter = pixels[idx]
                 val cTop = pixels[idx - width]
                 val cBottom = pixels[idx + width]
@@ -147,17 +160,14 @@ object ImageOptimizer {
 
                 val a = Color.alpha(cCenter)
 
-                // R
                 val rC = Color.red(cCenter)
                 val rDiff = (4 * rC - Color.red(cTop) - Color.red(cBottom) - Color.red(cLeft) - Color.red(cRight)) * weight
                 val rFinal = (rC + rDiff).toInt().coerceIn(0, 255)
 
-                // G
                 val gC = Color.green(cCenter)
                 val gDiff = (4 * gC - Color.green(cTop) - Color.green(cBottom) - Color.green(cLeft) - Color.green(cRight)) * weight
                 val gFinal = (gC + gDiff).toInt().coerceIn(0, 255)
 
-                // B
                 val bC = Color.blue(cCenter)
                 val bDiff = (4 * bC - Color.blue(cTop) - Color.blue(cBottom) - Color.blue(cLeft) - Color.blue(cRight)) * weight
                 val bFinal = (bC + bDiff).toInt().coerceIn(0, 255)
