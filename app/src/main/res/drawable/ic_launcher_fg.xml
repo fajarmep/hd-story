@@ -3,11 +3,7 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- Clean white background -->
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M0,0h108v108h-108z" />
-    <!-- Gradient / Vibrant Blue Video Badge -->
+    <!-- Vibrant Blue Video Frame -->
     <path
         android:fillColor="#2563EB"
         android:pathData="M34,32 L74,32 A10,10 0 0,1 84,42 L84,66 A10,10 0 0,1 74,76 L34,76 A10,10 0 0,1 24,66 L24,42 A10,10 0 0,1 34,32 Z" />
@@ -15,7 +11,7 @@
     <path
         android:fillColor="#FFFFFF"
         android:pathData="M48,43 L66,54 L48,65 Z" />
-    <!-- Small HD spark badge dot -->
+    <!-- Gold HD accent dot -->
     <path
         android:fillColor="#F59E0B"
         android:pathData="M76,34 A4,4 0 1,1 76,42 A4,4 0 1,1 76,34 Z" />

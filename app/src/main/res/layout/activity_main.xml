@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg_dark"
+    android:background="@color/bg_canvas"
     android:fillViewport="true">
 
     <LinearLayout
@@ -13,63 +13,87 @@
         android:orientation="vertical"
         android:padding="20dp">
 
-        <!-- Header -->
-        <TextView
-            android:id="@+id/tvAppTitle"
-            android:layout_width="wrap_content"
+        <!-- Modern Sleek Header with Icon -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/app_name"
-            android:textColor="@color/text_primary"
-            android:textSize="28sp"
-            android:textStyle="bold" />
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
-        <TextView
-            android:id="@+id/tvAppSubtitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="@string/title_sub"
-            android:textColor="@color/text_secondary"
-            android:textSize="14sp" />
+            <ImageView
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/ic_launcher" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="14dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvAppTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif-black"
+                    android:text="@string/app_name"
+                    android:textColor="@color/text_primary"
+                    android:textSize="24sp" />
+
+                <TextView
+                    android:id="@+id/tvAppSubtitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="@string/title_sub"
+                    android:textColor="@color/text_muted"
+                    android:textSize="12sp" />
+            </LinearLayout>
+        </LinearLayout>
 
         <!-- Platform Preset Card -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="22dp"
             app:cardBackgroundColor="@color/surface_card"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="0dp"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="2dp"
             app:strokeColor="@color/border_subtle"
-            app:strokeWidth="1dp">
+            app:strokeWidth="1.2dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:padding="18dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif-bold"
+                    android:letterSpacing="0.08"
                     android:text="@string/target_platform"
-                    android:textColor="@color/gold_accent"
-                    android:textSize="13sp"
-                    android:textStyle="bold" />
+                    android:textColor="@color/primary_accent"
+                    android:textSize="12sp" />
 
                 <RadioGroup
                     android:id="@+id/rgPlatform"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp">
+                    android:layout_marginTop="12dp">
 
                     <RadioButton
                         android:id="@+id/rbInstagram"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:buttonTint="@color/primary_accent"
                         android:checked="true"
-                        android:padding="8dp"
-                        android:text="Instagram (Story &amp; Reels 1080p, 30fps, 4.5M)"
+                        android:fontFamily="sans-serif-medium"
+                        android:padding="10dp"
+                        android:text="Instagram (Story &amp; Reels 1080p, 30fps)"
                         android:textColor="@color/text_primary"
                         android:textSize="14sp" />
 
@@ -77,8 +101,10 @@
                         android:id="@+id/rbWhatsApp"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:padding="8dp"
-                        android:text="WhatsApp Status HD (&lt;15MB Bypass Transcode)"
+                        android:buttonTint="@color/primary_accent"
+                        android:fontFamily="sans-serif-medium"
+                        android:padding="10dp"
+                        android:text="WhatsApp Status HD (&lt;15MB Dynamic Bitrate)"
                         android:textColor="@color/text_primary"
                         android:textSize="14sp" />
 
@@ -86,8 +112,10 @@
                         android:id="@+id/rbTikTok"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:padding="8dp"
-                        android:text="TikTok HD (1080x1920, 8-10M Bitrate)"
+                        android:buttonTint="@color/primary_accent"
+                        android:fontFamily="sans-serif-medium"
+                        android:padding="10dp"
+                        android:text="TikTok HD (1080x1920, 8.5M High Motion)"
                         android:textColor="@color/text_primary"
                         android:textSize="14sp" />
                 </RadioGroup>
@@ -100,23 +128,23 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             app:cardBackgroundColor="@color/surface_card"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="0dp"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="2dp"
             app:strokeColor="@color/border_subtle"
-            app:strokeWidth="1dp">
+            app:strokeWidth="1.2dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:orientation="vertical"
-                android:padding="20dp">
+                android:padding="22dp">
 
                 <ImageView
                     android:id="@+id/ivPreview"
                     android:layout_width="120dp"
                     android:layout_height="213dp"
-                    android:background="@color/surface_dark"
+                    android:background="@color/surface_card_secondary"
                     android:scaleType="centerCrop"
                     android:visibility="gone"
                     tools:visibility="visible" />
@@ -125,48 +153,51 @@
                     android:id="@+id/tvMediaInfo"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
+                    android:layout_marginTop="8dp"
+                    android:fontFamily="sans-serif"
                     android:text="@string/no_media_selected"
                     android:textColor="@color/text_secondary"
-                    android:textSize="14sp" />
+                    android:textSize="13sp" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnSelectMedia"
+                    style="@style/Widget.Material3.Button.TonalButton"
                     android:layout_width="match_parent"
                     android:layout_height="52dp"
                     android:layout_marginTop="16dp"
+                    android:fontFamily="sans-serif-bold"
                     android:text="@string/select_media"
-                    android:textSize="14sp"
-                    android:textStyle="bold"
-                    app:cornerRadius="12dp" />
+                    android:textSize="13sp"
+                    app:cornerRadius="14dp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Advanced Optimization Options -->
+        <!-- Tuning Options Card -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             app:cardBackgroundColor="@color/surface_card"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="0dp"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="2dp"
             app:strokeColor="@color/border_subtle"
-            app:strokeWidth="1dp">
+            app:strokeWidth="1.2dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:padding="18dp">
 
                 <com.google.android.material.materialswitch.MaterialSwitch
                     android:id="@+id/switchSharpen"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:checked="true"
+                    android:fontFamily="sans-serif-medium"
                     android:text="@string/option_sharpen"
                     android:textColor="@color/text_primary"
-                    android:textSize="14sp" />
+                    android:textSize="13sp" />
 
                 <com.google.android.material.materialswitch.MaterialSwitch
                     android:id="@+id/switchAspect"
@@ -174,9 +205,10 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:checked="true"
+                    android:fontFamily="sans-serif-medium"
                     android:text="@string/option_aspect"
                     android:textColor="@color/text_primary"
-                    android:textSize="14sp" />
+                    android:textSize="13sp" />
 
                 <com.google.android.material.materialswitch.MaterialSwitch
                     android:id="@+id/switchFpsLock"
@@ -184,32 +216,35 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:checked="true"
+                    android:fontFamily="sans-serif-medium"
                     android:text="@string/option_fps"
                     android:textColor="@color/text_primary"
-                    android:textSize="14sp" />
+                    android:textSize="13sp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Action Section -->
+        <!-- Main Optimize Button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnOptimize"
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="22dp"
             android:backgroundTint="@color/primary_accent"
+            android:elevation="4dp"
             android:enabled="false"
+            android:fontFamily="sans-serif-black"
+            android:letterSpacing="0.04"
             android:text="@string/btn_optimize"
-            android:textColor="@color/text_primary"
+            android:textColor="#FFFFFF"
             android:textSize="15sp"
-            android:textStyle="bold"
-            app:cornerRadius="14dp" />
+            app:cornerRadius="16dp" />
 
         <ProgressBar
             android:id="@+id/progressBar"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="14dp"
+            android:layout_height="8dp"
+            android:layout_marginTop="16dp"
             android:indeterminate="true"
             android:visibility="gone" />
 
@@ -217,13 +252,14 @@
             android:id="@+id/tvStatus"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="10dp"
+            android:fontFamily="sans-serif-medium"
             android:gravity="center"
             android:text="@string/status_ready"
             android:textColor="@color/text_secondary"
             android:textSize="13sp" />
 
-        <!-- Export Actions (Visible on Done) -->
+        <!-- Export Actions (Shown on Done) -->
         <LinearLayout
             android:id="@+id/layoutExportActions"
             android:layout_width="match_parent"
@@ -237,22 +273,23 @@
                 android:layout_width="match_parent"
                 android:layout_height="52dp"
                 android:backgroundTint="@color/success_green"
+                android:fontFamily="sans-serif-bold"
                 android:text="@string/btn_share"
-                android:textColor="@color/text_primary"
+                android:textColor="#FFFFFF"
                 android:textSize="14sp"
-                android:textStyle="bold"
-                app:cornerRadius="12dp" />
+                app:cornerRadius="14dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSave"
                 style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="match_parent"
                 android:layout_height="52dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="10dp"
+                android:fontFamily="sans-serif-medium"
                 android:text="@string/btn_save"
                 android:textColor="@color/text_primary"
                 android:textSize="14sp"
-                app:cornerRadius="12dp"
+                app:cornerRadius="14dp"
                 app:strokeColor="@color/border_subtle" />
         </LinearLayout>
 

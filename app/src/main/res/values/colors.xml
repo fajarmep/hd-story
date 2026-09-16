@@ -1,13 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="bg_dark">#0F1117</color>
-    <color name="surface_dark">#1A1D26</color>
-    <color name="surface_card">#222736</color>
-    <color name="primary_accent">#3B82F6</color>
-    <color name="primary_accent_hover">#2563EB</color>
-    <color name="gold_accent">#F59E0B</color>
-    <color name="text_primary">#F9FAFB</color>
-    <color name="text_secondary">#9CA3AF</color>
-    <color name="success_green">#10B981</color>
-    <color name="border_subtle">#374151</color>
+    <!-- Light Palette (Day default) -->
+    <color name="bg_canvas">#F8FAFC</color>
+    <color name="bg_dark">#F8FAFC</color>
+    <color name="surface_dark">#F1F5F9</color>
+    <color name="surface_card">#FFFFFF</color>
+    <color name="surface_card_secondary">#F1F5F9</color>
+    <color name="primary_accent">#2563EB</color>
+    <color name="primary_accent_hover">#1D4ED8</color>
+    <color name="primary_accent_glow">#3B82F6</color>
+    <color name="gold_accent">#D97706</color>
+    <color name="text_primary">#0F172A</color>
+    <color name="text_secondary">#475569</color>
+    <color name="text_muted">#94A3B8</color>
+    <color name="border_subtle">#E2E8F0</color>
+    <color name="border_active">#2563EB</color>
+    <color name="success_green">#059669</color>
 </resources>

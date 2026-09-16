@@ -7,6 +7,6 @@
         <item name="colorSurface">@color/surface_card</item>
         <item name="android:statusBarColor">@color/bg_canvas</item>
         <item name="android:navigationBarColor">@color/bg_canvas</item>
-        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightStatusBar">false</item>
     </style>
 </resources>
