@@ -29,6 +29,9 @@ object VideoOptimizer {
             outputFile.delete()
         }
 
+        val handler = Handler(Looper.getMainLooper())
+        val progressHolder = ProgressHolder()
+
         // 1. Scale-to-fit with crop to target 9:16 resolution
         val presentationEffect = Presentation.createForWidthAndHeight(
             config.width,
@@ -40,7 +43,7 @@ object VideoOptimizer {
             .setEffects(Effects(listOf(), listOf(presentationEffect)))
             .build()
 
-        // 2. H.264 High Profile L4.1 with high bitrate + keyframe interval
+        // 2. H.264 High Profile L4.1 with high bitrate
         val videoEncoderSettings = VideoEncoderSettings.Builder()
             .setBitrate(config.targetBitrate)
             .setEncodingProfileLevel(
@@ -81,8 +84,6 @@ object VideoOptimizer {
             .build()
 
         // 4. Poll progress every 500ms
-        val handler = Handler(Looper.getMainLooper())
-        val progressHolder = ProgressHolder()
         val progressPoller = object : Runnable {
             override fun run() {
                 if (!continuation.isActive) return
@@ -99,6 +100,7 @@ object VideoOptimizer {
             transformer.start(editedMediaItem, outputFile.absolutePath)
             handler.postDelayed(progressPoller, 500)
         } catch (e: Exception) {
+            handler.removeCallbacksAndMessages(null)
             if (continuation.isActive) {
                 continuation.resume(Result.failure(e))
             }
