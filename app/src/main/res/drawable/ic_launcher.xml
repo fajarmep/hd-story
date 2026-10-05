@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Solid Dark Slate Canvas -->
+    <path
+        android:fillColor="#121212"
+        android:pathData="M0,0h108v108h-108z" />
+
+    <group
+        android:translateX="27"
+        android:translateY="27">
+        <!-- Vertical 9:16 Story Frame (Exact 27x48 = 9:16, sharp 0dp flat rectangular) -->
+        <path
+            android:fillColor="#00000000"
+            android:strokeColor="#2563EB"
+            android:strokeWidth="3"
+            android:pathData="M13.5,3h27v48h-27z" />
+
+        <!-- Story status / progress indicator bar -->
+        <path
+            android:strokeColor="#3B82F6"
+            android:strokeWidth="1.8"
+            android:strokeLineCap="square"
+            android:pathData="M17.5,8h19" />
+
+        <!-- Bold Geometric 'H' -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M16.5,18.5h2.5v5.5h4v-5.5h2.5v15h-2.5v-6.9h-4v6.9h-2.5z" />
+
+        <!-- Bold Geometric 'D' with 45-deg chamfer -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M28.5,18.5h6.5l2.5,2.5v10l-2.5,2.5h-6.5z M31,21v10h2.8l1.2,-1.2v-7.6l-1.2,-1.2z" />
+
+        <!-- Bottom Media Play Indicator -->
+        <path
+            android:fillColor="#3B82F6"
+            android:pathData="M25,39.5 L30,42 L25,44.5 Z" />
+
+        <!-- Anti-Blur HD Clarity Star (Gold Accent) -->
+        <path
+            android:fillColor="#F59E0B"
+            android:pathData="M39.5,0.5 L40.7,3.5 L43.7,4.7 L40.7,5.9 L39.5,8.9 L38.3,5.9 L35.3,4.7 L38.3,3.5 Z" />
+    </group>
+</vector>
