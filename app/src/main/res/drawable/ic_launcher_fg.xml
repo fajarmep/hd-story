@@ -5,34 +5,26 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
 
-    <!-- Layer 1: Rounded Picture Frame -->
+    <!-- Layer 1: Frame with clean open cutout corner -->
     <path
         android:fillColor="#00000000"
         android:strokeColor="#1E3A5F"
-        android:strokeWidth="4"
-        android:pathData="M38,28 h32 a10,10 0 0,1 10,10 v32 a10,10 0 0,1 -10,10 h-32 a10,10 0 0,1 -10,-10 v-32 a10,10 0 0,1 10,-10 z" />
+        android:strokeWidth="3.5"
+        android:strokeLineCap="round"
+        android:pathData="M71.5,51.5 L71.5,37.5 a8,8 0 0,0 -8,-8 L37.5,29.5 a8,8 0 0,0 -8,8 L29.5,63.5 a8,8 0 0,0 8,8 L46.5,71.5" />
 
     <!-- Layer 2: Sun / Moon Circle -->
     <path
         android:fillColor="#1E3A5F"
-        android:pathData="M43,43 m-4.8,0 a4.8,4.8 0 1,0 9.6,0 a4.8,4.8 0 1,0 -9.6,0" />
+        android:pathData="M41.5,41.5 m-3.8,0 a3.8,3.8 0 1,0 7.6,0 a3.8,3.8 0 1,0 -7.6,0" />
 
-    <!-- Layer 3: Mountains Silhouette (bounded within rounded frame) -->
+    <!-- Layer 3: Mountains Silhouette with native curved negative space -->
     <path
         android:fillColor="#1E3A5F"
-        android:pathData="M28,68 L43,51 L53,62 L63,44 L80,64 v6 a10,10 0 0,1 -10,10 h-32 a10,10 0 0,1 -10,-10 z" />
+        android:pathData="M31,61.5 L41.5,47.5 L48.5,55.5 L57.5,41.5 L66.5,51.5 L60.5,57.5 C54.5,60.5 50.5,64.5 46.5,69.7 L37.5,69.7 a6.2,6.2 0 0,1 -6.2,-6.2 Z" />
 
-    <!-- Layer 4: White Knockout Buffer for Arrow -->
-    <path
-        android:fillColor="#FFFFFF"
-        android:strokeColor="#FFFFFF"
-        android:strokeWidth="6"
-        android:strokeLineCap="round"
-        android:strokeLineJoin="round"
-        android:pathData="M54,78 C54,69 61,62 70,60 L68,54 L82,63 L72,74 L71,68 C65,69 60,73 57,80 Z" />
-
-    <!-- Layer 5: Vibrant Sunset Orange Share / Export Arrow -->
+    <!-- Layer 4: Vibrant Sunset Orange Share / Export Arrow -->
     <path
         android:fillColor="#F97316"
-        android:pathData="M54,78 C54,69 61,62 70,60 L68,54 L82,63 L72,74 L71,68 C65,69 60,73 57,80 Z" />
+        android:pathData="M51.5,71.5 C51.5,65.5 56.5,59.5 64.5,57.5 L63.5,52.5 L74.5,59.5 L66.5,68.5 L65.5,63.5 C60.5,64.5 56.5,67.5 53.5,72.5 Z" />
 </vector>
