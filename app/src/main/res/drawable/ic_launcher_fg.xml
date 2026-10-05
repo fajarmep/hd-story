@@ -4,41 +4,35 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <group
-        android:translateX="27"
-        android:translateY="27">
-        <!-- Vertical 9:16 Story Frame (Exact 27x48 = 9:16, sharp 0dp flat rectangular) -->
-        <path
-            android:fillColor="#00000000"
-            android:strokeColor="#2563EB"
-            android:strokeWidth="3"
-            android:pathData="M13.5,3h27v48h-27z" />
 
-        <!-- Story status / progress indicator bar -->
-        <path
-            android:strokeColor="#3B82F6"
-            android:strokeWidth="1.8"
-            android:strokeLineCap="square"
-            android:pathData="M17.5,8h19" />
+    <!-- Layer 1: Rounded Picture Frame -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#1E3A5F"
+        android:strokeWidth="4"
+        android:pathData="M38,28 h32 a10,10 0 0,1 10,10 v32 a10,10 0 0,1 -10,10 h-32 a10,10 0 0,1 -10,-10 v-32 a10,10 0 0,1 10,-10 z" />
 
-        <!-- Bold Geometric 'H' -->
-        <path
-            android:fillColor="#FFFFFF"
-            android:pathData="M16.5,18.5h2.5v5.5h4v-5.5h2.5v15h-2.5v-6.9h-4v6.9h-2.5z" />
+    <!-- Layer 2: Sun / Moon Circle -->
+    <path
+        android:fillColor="#1E3A5F"
+        android:pathData="M43,43 m-4.8,0 a4.8,4.8 0 1,0 9.6,0 a4.8,4.8 0 1,0 -9.6,0" />
 
-        <!-- Bold Geometric 'D' with 45-deg chamfer -->
-        <path
-            android:fillColor="#FFFFFF"
-            android:pathData="M28.5,18.5h6.5l2.5,2.5v10l-2.5,2.5h-6.5z M31,21v10h2.8l1.2,-1.2v-7.6l-1.2,-1.2z" />
+    <!-- Layer 3: Mountains Silhouette (bounded within rounded frame) -->
+    <path
+        android:fillColor="#1E3A5F"
+        android:pathData="M28,68 L43,51 L53,62 L63,44 L80,64 v6 a10,10 0 0,1 -10,10 h-32 a10,10 0 0,1 -10,-10 z" />
 
-        <!-- Bottom Media Play Indicator -->
-        <path
-            android:fillColor="#3B82F6"
-            android:pathData="M25,39.5 L30,42 L25,44.5 Z" />
+    <!-- Layer 4: White Knockout Buffer for Arrow -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="6"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M54,78 C54,69 61,62 70,60 L68,54 L82,63 L72,74 L71,68 C65,69 60,73 57,80 Z" />
 
-        <!-- Anti-Blur HD Clarity Star (Gold Accent) -->
-        <path
-            android:fillColor="#F59E0B"
-            android:pathData="M39.5,0.5 L40.7,3.5 L43.7,4.7 L40.7,5.9 L39.5,8.9 L38.3,5.9 L35.3,4.7 L38.3,3.5 Z" />
-    </group>
+    <!-- Layer 5: Vibrant Sunset Orange Share / Export Arrow -->
+    <path
+        android:fillColor="#F97316"
+        android:pathData="M54,78 C54,69 61,62 70,60 L68,54 L82,63 L72,74 L71,68 C65,69 60,73 57,80 Z" />
 </vector>
