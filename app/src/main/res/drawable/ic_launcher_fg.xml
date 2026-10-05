@@ -5,26 +5,26 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
 
-    <!-- Layer 1: Frame with clean open cutout corner -->
+    <!-- Layer 1: Sun / Moon Circle -->
+    <path
+        android:fillColor="#1E3A5F"
+        android:pathData="M45,45 m-3.8,0 a3.8,3.8 0 1,0 7.6,0 a3.8,3.8 0 1,0 -7.6,0" />
+
+    <!-- Layer 2: Mountains Silhouette (underneath the frame stroke) -->
+    <path
+        android:fillColor="#1E3A5F"
+        android:pathData="M32,63 L45,49.5 L52,57.5 L61,43.5 L70,53.5 L64,59.5 C58,62.5 54,66.5 50,74.5 L38,74.5 a6.5,6.5 0 0,1 -6.5,-6.5 Z" />
+
+    <!-- Layer 3: Frame with clean open cutout corner (Drawn on top) -->
     <path
         android:fillColor="#00000000"
         android:strokeColor="#1E3A5F"
         android:strokeWidth="3.5"
         android:strokeLineCap="round"
-        android:pathData="M71.5,51.5 L71.5,37.5 a8,8 0 0,0 -8,-8 L37.5,29.5 a8,8 0 0,0 -8,8 L29.5,63.5 a8,8 0 0,0 8,8 L46.5,71.5" />
-
-    <!-- Layer 2: Sun / Moon Circle -->
-    <path
-        android:fillColor="#1E3A5F"
-        android:pathData="M41.5,41.5 m-3.8,0 a3.8,3.8 0 1,0 7.6,0 a3.8,3.8 0 1,0 -7.6,0" />
-
-    <!-- Layer 3: Mountains Silhouette with native curved negative space -->
-    <path
-        android:fillColor="#1E3A5F"
-        android:pathData="M31,61.5 L41.5,47.5 L48.5,55.5 L57.5,41.5 L66.5,51.5 L60.5,57.5 C54.5,60.5 50.5,64.5 46.5,69.7 L37.5,69.7 a6.2,6.2 0 0,1 -6.2,-6.2 Z" />
+        android:pathData="M76,55 L76,40 a8,8 0 0,0 -8,-8 L40,32 a8,8 0 0,0 -8,8 L32,68 a8,8 0 0,0 8,8 L50,76" />
 
     <!-- Layer 4: Vibrant Sunset Orange Share / Export Arrow -->
     <path
         android:fillColor="#F97316"
-        android:pathData="M51.5,71.5 C51.5,65.5 56.5,59.5 64.5,57.5 L63.5,52.5 L74.5,59.5 L66.5,68.5 L65.5,63.5 C60.5,64.5 56.5,67.5 53.5,72.5 Z" />
+        android:pathData="M53.5,76 C53.5,70 58.5,64 66.5,62 L65.5,57 L78.5,64 L70.5,73 L69.5,68 C64.5,69 60.5,72 57.5,77 Z" />
 </vector>
